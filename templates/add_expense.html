@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Add Expense - Personal Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h3 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Expense
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount (Rs)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                            <input type="number" class="form-control" id="amount" name="amount" 
+                                   step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">Select a category</option>
+                                <option value="Food & Dining">Food & Dining</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Housing">Housing</option>
+                                <option value="Education">Education</option>
+                                <option value="Travel">Travel</option>
+                                <option value="Insurance">Insurance</option>
+                                <option value="Investments">Investments</option>
+                                <option value="Gifts">Gifts</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-comment"></i></span>
+                            <input type="text" class="form-control" id="description" name="description" 
+                                   placeholder="Brief description of the expense">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="date" class="form-label">Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="date" class="form-control" id="date" name="date" 
+                                   value="{{ today }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Expense
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Add Categories -->
+        <div class="card mt-4">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Add Common Expenses
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <button class="btn btn-outline-primary w-100" onclick="quickAdd('Food & Dining', 25)">
+                            <i class="fas fa-utensils me-1"></i>Lunch (Rs25)
+                        </button>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <button class="btn btn-outline-primary w-100" onclick="quickAdd('Transportation', 15)">
+                            <i class="fas fa-car me-1"></i>Gas (Rs15)
+                        </button>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <button class="btn btn-outline-primary w-100" onclick="quickAdd('Entertainment', 50)">
+                            <i class="fas fa-film me-1"></i>Movie (Rs50)
+                        </button>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <button class="btn btn-outline-primary w-100" onclick="quickAdd('Shopping', 100)">
+                            <i class="fas fa-shopping-bag me-1"></i>Shopping (Rs100)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Set today's date as default
+document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+function quickAdd(category, amount) {
+    document.getElementById('category').value = category;
+    document.getElementById('amount').value = amount;
+    document.getElementById('description').focus();
+}
+</script>
+{% endblock %} 

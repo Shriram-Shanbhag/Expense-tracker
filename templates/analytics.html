@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Personal Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="text-white fw-bold">
+            <i class="fas fa-chart-bar me-2"></i>Analytics
+        </h1>
+        <p class="text-white-50">Detailed insights into your spending patterns</p>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-pie fa-2x text-primary mb-2"></i>
+                <h4 class="fw-bold">{{ category_data|length }}</h4>
+                <p class="text-muted mb-0">Categories Used</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                <h4 class="fw-bold">Rs{{ "%.2f"|format(category_data|sum(attribute='total')) }}</h4>
+                <p class="text-muted mb-0">Total This Month</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-day fa-2x text-warning mb-2"></i>
+                <h4 class="fw-bold">{{ daily_data|length }}</h4>
+                <p class="text-muted mb-0">Days with Expenses</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-trending-up fa-2x text-info mb-2"></i>
+                <h4 class="fw-bold">Rs{{ "%.2f"|format((category_data|sum(attribute='total')) / 30 if category_data|sum(attribute='total') > 0 else 0) }}</h4>
+                <p class="text-muted mb-0">Daily Average</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Category Breakdown Chart -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Category Breakdown
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Daily Spending Trend -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Daily Spending Trend
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dailyChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Comparison -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Monthly Comparison (Last 6 Months)
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Statistics -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Category Details
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if category_data %}
+                    {% for category in category_data %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border-bottom">
+                        <div>
+                            <div class="fw-bold">{{ category.category }}</div>
+                            <small class="text-muted">{{ category.count }} transactions</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">Rs{{ "%.2f"|format(category.total) }}</div>
+                            <small class="text-muted">
+                                {{ "%.1f"|format((category.total / (category_data|sum(attribute='total'))) * 100) }}%
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Spending Insights
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if category_data %}
+                    {% set total_spent = category_data|sum(attribute='total') %}
+                    {% set top_category = category_data|first %}
+                    {% set avg_per_day = total_spent / 30 %}
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted">Top Spending Category</h6>
+                        <p class="fw-bold">{{ top_category.category }} - Rs{{ "%.2f"|format(top_category.total) }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted">Average Daily Spending</h6>
+                        <p class="fw-bold">Rs{{ "%.2f"|format(avg_per_day) }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted">Most Active Day</h6>
+                        {% if daily_data %}
+                            {% set max_day = daily_data|max(attribute='total') %}
+                            <p class="fw-bold">{{ max_day.date }} - Rs{{ "%.2f"|format(max_day.total) }}</p>
+                        {% else %}
+                            <p class="fw-bold">No data available</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted">Budget Status</h6>
+                        {% if avg_per_day > 50 %}
+                            <p class="fw-bold text-warning">High daily average - Consider reducing expenses</p>
+                        {% elif avg_per_day > 30 %}
+                            <p class="fw-bold text-info">Moderate spending - Monitor closely</p>
+                        {% else %}
+                            <p class="fw-bold text-success">Good spending control - Keep it up!</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No data available for insights</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Category Breakdown Chart
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryChart = new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for category in category_data %}'{{ category.category }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for category in category_data %}{{ category.total }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Daily Spending Chart
+const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+const dailyChart = new Chart(dailyCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for day in daily_data %}'{{ day.date }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Daily Spending (Rs)',
+            data: [{% for day in daily_data %}{{ day.total }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            borderColor: '#36A2EB',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'Rs' + value;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Monthly Comparison Chart
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+const monthlyChart = new Chart(monthlyCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for month in monthly_comparison %}'{{ month.month }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Monthly Spending (Rs)',
+            data: [{% for month in monthly_comparison %}{{ month.total }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            borderColor: '#36A2EB',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'Rs' + value;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 

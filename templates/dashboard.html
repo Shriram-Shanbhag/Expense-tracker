@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Personal Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="text-white fw-bold">
+            <i class="fas fa-chart-line me-2"></i>Dashboard
+        </h1>
+        <p class="text-white-50">Welcome back, {{ current_user.username }}!</p>
+    </div>
+</div>
+
+<!-- Current Month Overview -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-dollar-sign fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold">Rs{{ "%.2f"|format(total_expense) }}</h3>
+                <p class="text-muted mb-0">This Month's Total</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-day fa-2x text-success mb-2"></i>
+                <h3 class="fw-bold">{{ category_expenses|length }}</h3>
+                <p class="text-muted mb-0">Categories Used</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-pie fa-2x text-warning mb-2"></i>
+                <h3 class="fw-bold">{{ recent_expenses|length }}</h3>
+                <p class="text-muted mb-0">Recent Transactions</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card expense-card">
+            <div class="card-body text-center">
+                <i class="fas fa-trending-up fa-2x text-info mb-2"></i>
+                <h3 class="fw-bold">{{ "%.1f"|format(total_expense / 30 if total_expense > 0 else 0) }}</h3>
+                <p class="text-muted mb-0">Daily Average</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Category Breakdown -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Category Breakdown
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if category_expenses %}
+                    {% for category in category_expenses %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="category-badge bg-primary text-white me-3">
+                                {{ category.category }}
+                            </span>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">Rs{{ "%.2f"|format(category.total) }}</div>
+                            <small class="text-muted">
+                                {{ "%.1f"|format((category.total / total_expense) * 100) }}%
+                            </small>
+                        </div>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar" style="width: {{ (category.total / total_expense) * 100 }}%"></div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No expenses recorded this month</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Expenses -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Recent Expenses
+                </h5>
+                <a href="{{ url_for('add_expense') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>Add New
+                </a>
+            </div>
+            <div class="card-body">
+                {% if recent_expenses %}
+                    {% for expense in recent_expenses %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border-bottom">
+                        <div>
+                            <div class="fw-bold">{{ expense.description or 'No description' }}</div>
+                            <small class="text-muted">
+                                <span class="category-badge bg-secondary text-white me-2">
+                                    {{ expense.category }}
+                                </span>
+                                {{ expense.date }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-danger">Rs{{ "%.2f"|format(expense.amount) }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No recent expenses</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('add_expense') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i>Add Expense
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('history') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-history me-2"></i>View History
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('analytics') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-chart-bar me-2"></i>Analytics
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-outline-secondary w-100" onclick="exportData()">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function exportData() {
+    fetch('/api/expenses')
+        .then(response => response.json())
+        .then(data => {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Date,Category,Description,Amount\n"
+                + data.map(row => `${row.date},${row.category},${row.description || ''},${row.amount}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "expenses.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+}
+</script>
+{% endblock %} 
