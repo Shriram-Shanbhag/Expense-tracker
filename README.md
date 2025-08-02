@@ -178,10 +178,4 @@ Potential features for future versions:
 - Mobile app version
 - Cloud backup integration
 
-## License
-
-This project is open source and available under the MIT License.
-
----
-
 **Happy Budgeting! 💰** 
